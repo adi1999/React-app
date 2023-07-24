@@ -35,4 +35,77 @@ app.post('/login', (req, res) => {
 
 app.listen(5000, () => {
   console.log('Server is running on port 5000');
+
+
+  
 });
+
+
+
+
+
+<mat-form-field>
+  <mat-label>First Dropdown</mat-label>
+  <mat-select (selectionChange)="onFirstDropdownChange($event)">
+    <mat-option *ngFor="let option of firstDropdownOptions" [value]="option.value">
+      {{ option.name }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+<mat-form-field *ngIf="secondDropdownOptions.length > 0">
+  <mat-label>Second Dropdown</mat-label>
+  <mat-select>
+    <mat-option *ngFor="let option of secondDropdownOptions" [value]="option.value">
+      {{ option.name }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
+
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-dropdown-component',
+  templateUrl: './dropdown-component.component.html',
+  styleUrls: ['./dropdown-component.component.css'],
+})
+export class DropdownComponent {
+  firstDropdownOptions = [
+    { name: 'Option 1', value: 'option1' },
+    { name: 'Option 2', value: 'option2' },
+    { name: 'Option 3', value: 'option3' },
+  ];
+
+  secondDropdownOptions: any[] = [];
+
+  onFirstDropdownChange(event: any) {
+    const selectedValue = event.value;
+    // Replace this switch statement with your logic to fetch options based on the selectedValue.
+    switch (selectedValue) {
+      case 'option1':
+        this.secondDropdownOptions = [
+          { name: 'Option A', value: 'optionA' },
+          { name: 'Option B', value: 'optionB' },
+        ];
+        break;
+      case 'option2':
+        this.secondDropdownOptions = [
+          { name: 'Option X', value: 'optionX' },
+          { name: 'Option Y', value: 'optionY' },
+        ];
+        break;
+      case 'option3':
+        this.secondDropdownOptions = [
+          { name: 'Option P', value: 'optionP' },
+          { name: 'Option Q', value: 'optionQ' },
+        ];
+        break;
+      default:
+        this.secondDropdownOptions = [];
+    }
+  }
+}
+
