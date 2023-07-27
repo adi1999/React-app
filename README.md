@@ -1,29 +1,53 @@
-@Component({
-  selector: 'app-present-time',
-  template: '<div>{{ presentTime }}</div>'
-})
-export class PresentTimeComponent {
-  presentTime: string;
+import org.apache.spark.sql.{SparkSession, DataFrame}
+import org.apache.spark.sql.functions._
 
-  constructor() {
-    // Get the current date
-    const currentDate = new Date();
+object DataFrameJoinCaseInsensitive {
+  def main(args: Array[String]): Unit = {
+    // Create a SparkSession
+    val spark = SparkSession.builder()
+      .appName("DataFrameJoinCaseInsensitive")
+      .master("local[*]") // Use 'local[*]' for local testing; change accordingly for cluster deployment
+      .getOrCreate()
 
-    // Extract individual date and time components
-    const year = currentDate.getFullYear();
-    const month = this.padNumber(currentDate.getMonth() + 1);
-    const day = this.padNumber(currentDate.getDate());
-    const hours = this.padNumber(currentDate.getHours());
-    const minutes = this.padNumber(currentDate.getMinutes());
-    const seconds = this.padNumber(currentDate.getSeconds());
+    // Sample data for DataFrame1
+    val data1 = Seq(
+      ("John", 25),
+      ("alice", 30),
+      ("Mary", 22)
+    )
+    val columns1 = Seq("Name", "Age")
+    val df1 = spark.createDataFrame(data1).toDF(columns1: _*)
 
-    // Build the formatted string
-    this.presentTime = `${year}${month}${day}${hours}${minutes}${seconds}`;
+    // Sample data for DataFrame2
+    val data2 = Seq(
+      ("JOHN", "Engineer"),
+      ("ALICE", "Doctor"),
+      ("mike", "Teacher")
+    )
+    val columns2 = Seq("Name", "Profession")
+    val df2 = spark.createDataFrame(data2).toDF(columns2: _*)
+
+    // Join the DataFrames with case insensitivity
+    val joinedDF = joinDataFramesCaseInsensitive(df1, df2, "Name")
+
+    // Show the result
+    joinedDF.show()
   }
 
-  private padNumber(num: number): string {
-    // Function to add leading zero to numbers less than 10
-    return num < 10 ? `0${num}` : num.toString();
+  // Function to join DataFrames with case insensitivity on the specified column
+  def joinDataFramesCaseInsensitive(df1: DataFrame, df2: DataFrame, joinColumn: String): DataFrame = {
+    // Create a new column in each DataFrame containing the lowercased version of the join column
+    val df1Lowercased = df1.withColumn("joinKey", lower(col(joinColumn)))
+    val df2Lowercased = df2.withColumn("joinKey", lower(col(joinColumn)))
+
+    // Perform the join on the lowercased join key
+    val joinedDF = df1Lowercased.join(df2Lowercased, Seq("joinKey"), "inner")
+
+    // Select the columns from the original DataFrames and drop the temporary joinKey column
+    val selectColumns = df1.columns ++ df2.columns.drop(1).map(colName => s"${colName}_2")
+    val resultDF = joinedDF.select(selectColumns.map(col): _*)
+
+    resultDF
   }
 }
 
