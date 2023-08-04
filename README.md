@@ -13,24 +13,24 @@ export class YourComponent {
     // Add more options if needed
   ];
 
-  selectedOption: string;
+  selectedOptions: string[] = [];
 
   constructor() {
-    // Initialize selectedOption here if needed
+    // Initialize selectedOptions here if needed
   }
 
   onSelectionChange(event: any) {
-    if (this.selectedOption === 'select-all') {
-      // Select all options
-      this.options.forEach(option => {
-        if (option.value !== 'select-all') {
-          this.selectedOption = option.value;
-        }
-      });
+    if (this.selectedOptions.includes('select-all')) {
+      // If "Select All" is already selected, remove it from the selectedOptions array
+      this.selectedOptions = this.selectedOptions.filter(option => option !== 'select-all');
+    } else if (this.selectedOptions.length === this.options.length - 1) {
+      // If all other options are already selected, replace with "Select All"
+      this.selectedOptions = ['select-all'];
     } else {
       // Handle other selections
-      console.log('Selected option:', this.selectedOption);
+      console.log('Selected options:', this.selectedOptions);
     }
   }
 }
+
 
